@@ -115,6 +115,9 @@ SPH_TL3_INPUT_REGISTERS = {
     1061: {"name": "load_energy_today_low", "pair": 1060, "combined_scale": 0.1, "combined_unit": "kWh"},
     1062: {"name": "load_energy_total_high", "pair": 1063},
     1063: {"name": "load_energy_total_low", "pair": 1062, "combined_scale": 0.1, "combined_unit": "kWh"},
+
+    # Dry contact relay current state (0=Off, 1=On)
+    3119: {"name": "dry_contact_state", "scale": 1, "unit": ""},
 }
 
 # Register blocks to poll: (start_address, count) - kept tight to minimise
@@ -132,11 +135,85 @@ SPH_TL3_INPUT_BLOCKS = [
     (1037, 3),    # 1037-1039: power to load, self-consumption %
     (1040, 1),    # 1040: battery temp
     (1044, 20),   # 1044-1063: energy breakdown
+    (3119, 1),    # 3119: dry contact relay state
 ]
 
+# Each entry additionally carries a "control_type" used to decide which HA
+# platform picks it up: "switch" (on/off), "number" (RW percentage-like
+# value, min/max already in display units) or "diagnostic" (read-only,
+# shown as a plain diagnostic sensor). Entries with "enabled_default": False
+# are advanced/rarely-used controls, created but hidden until the user
+# opts in (Settings -> Entities -> enable).
 SPH_TL3_HOLDING_REGISTERS = {
-    0: {"name": "on_off", "scale": 1, "unit": "", "access": "RW"},
-    # Export limit power percentage (0.0-100.0%), used by the
-    # "VPP Export Limit Power Rate" control.
-    123: {"name": "export_limit_power", "scale": 0.1, "unit": "%", "access": "RW"},
+    0: {"name": "on_off", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+
+    # Export limit power percentage (0.0-100.0%)
+    123: {"name": "export_limit_power", "scale": 0.1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100},
+
+    # Minimum battery SOC in Load First mode
+    608: {"name": "load_first_battery_minimum_soc", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": 10, "max": 100},
+
+    # Battery discharge/charge control
+    1070: {"name": "discharge_power_rate", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100},
+    1071: {"name": "discharge_stopped_soc", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100},
+    1090: {"name": "charge_power_rate", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100},
+    1091: {"name": "charge_stopped_soc", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100},
+    1092: {"name": "ac_charge_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+
+    # Time-of-use scheduling window enable flags (paired with the start/end
+    # time entities defined in SPH_TL3_TIME_WINDOWS below).
+    1102: {"name": "time_period_1_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+    1105: {"name": "time_period_2_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+    1108: {"name": "time_period_3_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+    1019: {"name": "batt_first_time_period_4_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1022: {"name": "batt_first_time_period_5_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1025: {"name": "batt_first_time_period_6_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1028: {"name": "grid_first_time_period_4_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1031: {"name": "grid_first_time_period_5_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1034: {"name": "grid_first_time_period_6_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1082: {"name": "grid_first_time_period_7_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1085: {"name": "grid_first_time_period_8_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    1088: {"name": "grid_first_time_period_9_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+
+    # Dry contact control (needs the hardware relay wired up)
+    3016: {"name": "dry_contact_enable", "scale": 1, "unit": "", "access": "RW", "control_type": "switch", "enabled_default": False},
+    3017: {"name": "dry_contact_on_rate", "scale": 0.1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100, "enabled_default": False},
+    3019: {"name": "dry_contact_off_rate", "scale": 0.1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100, "enabled_default": False},
+
+    # Safety/compliance diagnostic registers (read-only)
+    235: {"name": "ntognd_detect", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
+    236: {"name": "nonstd_vac_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
+    237: {"name": "enable_spec_set", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
+    238: {"name": "fast_mppt_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
 }
+
+# Holding registers read as contiguous blocks (same idea as SPH_TL3_INPUT_BLOCKS).
+SPH_TL3_HOLDING_BLOCKS = [
+    (0, 1),        # on_off
+    (123, 1),      # export_limit_power
+    (235, 4),      # 235-238: safety/compliance diagnostics
+    (608, 1),      # load_first_battery_minimum_soc
+    (1017, 18),    # 1017-1034: Battery First 4-6 + Grid First 4-6 windows
+    (1070, 2),     # discharge_power_rate, discharge_stopped_soc
+    (1080, 9),     # 1080-1088: Grid First 7-9 windows
+    (1090, 3),     # charge_power_rate, charge_stopped_soc, ac_charge_enable
+    (1100, 9),     # 1100-1108: Time Period 1-3 windows
+    (3016, 4),     # 3016-3019: dry contact control
+]
+
+# Time-of-use scheduling windows: (label, suffix, start_reg, end_reg, enable_reg, enabled_default)
+# Registers are hex-packed: raw = hour * 256 + minute.
+SPH_TL3_TIME_WINDOWS = [
+    ("Time Period 1", "time_period_1", 1100, 1101, 1102, True),
+    ("Time Period 2", "time_period_2", 1103, 1104, 1105, True),
+    ("Time Period 3", "time_period_3", 1106, 1107, 1108, True),
+    ("Battery First Slot 4", "batt_first_time_period_4", 1017, 1018, 1019, False),
+    ("Battery First Slot 5", "batt_first_time_period_5", 1020, 1021, 1022, False),
+    ("Battery First Slot 6", "batt_first_time_period_6", 1023, 1024, 1025, False),
+    ("Grid First Slot 4", "grid_first_time_period_4", 1026, 1027, 1028, False),
+    ("Grid First Slot 5", "grid_first_time_period_5", 1029, 1030, 1031, False),
+    ("Grid First Slot 6", "grid_first_time_period_6", 1032, 1033, 1034, False),
+    ("Grid First Slot 7", "grid_first_time_period_7", 1080, 1081, 1082, False),
+    ("Grid First Slot 8", "grid_first_time_period_8", 1083, 1084, 1085, False),
+    ("Grid First Slot 9", "grid_first_time_period_9", 1086, 1087, 1088, False),
+]

@@ -54,13 +54,37 @@ MIC_INPUT_BLOCKS = [
     (64, 1),     # 64: warning code
 ]
 
+# See SPH_TL3_HOLDING_REGISTERS in sph_tl3.py for what "control_type" and
+# "enabled_default" mean. Note: holding register 30 ("com_address" - the
+# Modbus slave/unit ID itself) is deliberately NOT exposed here - writing
+# it from Home Assistant risks the inverter switching to an address this
+# integration is no longer configured for, silently losing the connection.
 MIC_HOLDING_REGISTERS = {
-    0: {"name": "on_off", "scale": 1, "unit": "", "access": "RW"},
+    0: {"name": "on_off", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+    2: {"name": "pf_cmd_memory", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+
     # Max output active power percentage (0-100%). This is the single
     # physical control on this inverter family - the upstream integration
     # exposes it twice under two different entity names ("Active Power
     # Rate" and "Max Output Power Rate") which both write the same
     # register; this integration exposes it once, as "Max Output Power
     # Rate", matching the entity that was actually functioning.
-    3: {"name": "max_output_power_rate", "scale": 1, "unit": "%", "access": "RW"},
+    3: {"name": "max_output_power_rate", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100},
+
+    4: {"name": "reactive_power_rate", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": -100, "max": 100, "enabled_default": False},
+    5: {"name": "power_factor", "scale": 1, "unit": "", "access": "RW", "control_type": "number", "min": 0, "max": 20000, "enabled_default": False},
+
+    3000: {"name": "export_limit_failed_power_rate", "scale": 0.1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100, "enabled_default": False},
+
+    # Safety/compliance diagnostic registers (read-only)
+    235: {"name": "ntognd_detect", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
+    236: {"name": "nonstd_vac_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
+    237: {"name": "enable_spec_set", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
+    238: {"name": "fast_mppt_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
 }
+
+MIC_HOLDING_BLOCKS = [
+    (0, 6),        # 0-5: on_off, pf_cmd_memory, max_output_power_rate, reactive_power_rate, power_factor
+    (235, 4),      # 235-238: safety/compliance diagnostics
+    (3000, 1),     # export_limit_failed_power_rate
+]

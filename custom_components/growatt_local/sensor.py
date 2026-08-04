@@ -32,8 +32,22 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
-from .const import CONF_DEVICE_NAME, CONF_PROFILE, DOMAIN, PROFILE_MIC, PROFILE_SPH_TL3
-from .coordinator import GrowattLocalCoordinator
+from .const import (
+    CONF_DEVICE_NAME,
+    CONF_PROFILE,
+    DOMAIN,
+    FAULT_CODE_TEXT,
+    PROFILE_MIC,
+    PROFILE_SPH_TL3,
+    WARNING_CODE_TEXT,
+    display_name,
+    entity_suffix,
+)
+from .coordinator import GrowattLocalCoordinator, PROFILE_REGISTER_MAPS
+
+VALUE_MAPS = {
+    "dry_contact_state": {0: "Off", 1: "On"},
+}
 
 # Each entry: (register_key, entity_id_suffix, name, device_class, state_class, unit, icon)
 SPH_TL3_SENSORS: list[tuple[str, str, str, Any, Any, Any, str]] = [
@@ -87,7 +101,10 @@ SPH_TL3_SENSORS: list[tuple[str, str, str, Any, Any, Any, str]] = [
     ("charge_energy_total", "charge_energy_total", "Charge Energy Total", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, UnitOfEnergy.KILO_WATT_HOUR, "mdi:battery-plus"),
     ("load_energy_today", "load_energy_today", "Load Energy Today", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, UnitOfEnergy.KILO_WATT_HOUR, "mdi:home-lightning-bolt"),
     ("load_energy_total", "load_energy_total", "Load Energy Total", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, UnitOfEnergy.KILO_WATT_HOUR, "mdi:home-lightning-bolt"),
+    ("dry_contact_state", "dry_contact_state", "Dry Contact State", None, None, None, "mdi:electric-switch"),
 ]
+
+SPH_TL3_DIAGNOSTIC_DEFAULT_ENABLED = {"dry_contact_state": False}
 
 MIC_SENSORS: list[tuple[str, str, str, Any, Any, Any, str]] = [
     ("inverter_status", "status", "Status", None, None, None, "mdi:information-outline"),
@@ -112,7 +129,12 @@ SENSOR_DEFINITIONS = {
     PROFILE_MIC: MIC_SENSORS,
 }
 
-DIAGNOSTIC_SUFFIXES = {"status", "fault_code", "warning_code"}
+DIAGNOSTIC_SUFFIXES = {"status", "fault_code", "warning_code", "dry_contact_state"}
+
+# (register_key, suffix, name, device_class, state_class, unit, icon) tuples
+# for the fixed sensor list, or None below - the diagnostic holding
+# registers (control_type == "diagnostic") are added dynamically per
+# profile since they're pure passthroughs of the register map.
 
 
 async def async_setup_entry(
@@ -122,12 +144,33 @@ async def async_setup_entry(
 ) -> None:
     coordinator: GrowattLocalCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     device_slug = slugify(config_entry.data[CONF_DEVICE_NAME])
-    definitions = SENSOR_DEFINITIONS[config_entry.data[CONF_PROFILE]]
+    profile = config_entry.data[CONF_PROFILE]
+    definitions = SENSOR_DEFINITIONS[profile]
+    enabled_overrides = {PROFILE_SPH_TL3: SPH_TL3_DIAGNOSTIC_DEFAULT_ENABLED}.get(profile, {})
 
     entities = [
-        GrowattSensor(coordinator, config_entry, device_slug, *definition)
+        GrowattSensor(
+            coordinator, config_entry, device_slug, *definition,
+            enabled_default=enabled_overrides.get(definition[0], True),
+        )
         for definition in definitions
     ]
+
+    holding_registers = PROFILE_REGISTER_MAPS[profile]["holding_registers"]
+    for register_key, meta in holding_registers.items():
+        if meta.get("control_type") != "diagnostic":
+            continue
+        suffix = entity_suffix(meta["name"])
+        entities.append(
+            GrowattSensor(
+                coordinator, config_entry, device_slug,
+                meta["name"], suffix, display_name(meta["name"]),
+                None, None, None, "mdi:cog-outline",
+                enabled_default=meta.get("enabled_default", True),
+                is_diagnostic=True,
+            )
+        )
+
     async_add_entities(entities)
 
 
@@ -148,10 +191,13 @@ class GrowattSensor(CoordinatorEntity, SensorEntity):
         state_class: Any,
         unit: Any,
         icon: str,
+        enabled_default: bool = True,
+        is_diagnostic: bool = False,
     ) -> None:
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._register_key = register_key
+        self._value_map = VALUE_MAPS.get(register_key)
 
         self.entity_id = f"sensor.{device_slug}_{suffix}"
         self._attr_unique_id = f"{config_entry.entry_id}_{suffix}"
@@ -160,7 +206,8 @@ class GrowattSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = state_class
         self._attr_native_unit_of_measurement = unit
         self._attr_icon = icon
-        if suffix in DIAGNOSTIC_SUFFIXES:
+        self._attr_entity_registry_enabled_default = enabled_default
+        if is_diagnostic or suffix in DIAGNOSTIC_SUFFIXES:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
@@ -171,7 +218,25 @@ class GrowattSensor(CoordinatorEntity, SensorEntity):
     def native_value(self):
         if self.coordinator.data is None:
             return None
-        return self.coordinator.data.get(self._register_key)
+        raw = self.coordinator.data.get(self._register_key)
+        if raw is None:
+            return None
+        if self._value_map is not None:
+            return self._value_map.get(raw, raw)
+        return raw
+
+    @property
+    def extra_state_attributes(self):
+        if self.coordinator.data is None:
+            return None
+        raw = self.coordinator.data.get(self._register_key)
+        if raw is None:
+            return None
+        if self._register_key == "fault_code":
+            return {"description": FAULT_CODE_TEXT.get(raw, f"Code {raw} - see inverter display/manual")}
+        if self._register_key == "warning_code":
+            return {"description": WARNING_CODE_TEXT.get(raw, f"Code {raw} - see inverter display/manual")}
+        return None
 
     @property
     def available(self) -> bool:
