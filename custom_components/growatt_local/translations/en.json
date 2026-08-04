@@ -1,0 +1,32 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add Growatt inverter",
+        "description": "Enter the connection details for one inverter. To keep your existing helpers/automations working, use the exact same device name you used in the previous integration (e.g. \"Growatt-SPH-10K\" or \"Growatt-MIC1500\").",
+        "data": {
+          "device_name": "Device name",
+          "profile": "Inverter model",
+          "host": "Host / IP address",
+          "port": "Port",
+          "slave_id": "Slave ID (Modbus unit ID)",
+          "scan_interval": "Scan interval (seconds)",
+          "timeout": "Timeout (seconds)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This inverter (host/port/slave ID) is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan interval (seconds)",
+          "timeout": "Timeout (seconds)"
+        }
+      }
+    }
+  }
+}
