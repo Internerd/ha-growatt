@@ -1,0 +1,13 @@
+{
+  "domain": "growatt_local",
+  "name": "Growatt Local (SPH-TL3 / MIC)",
+  "codeowners": ["@marcel-hoess"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/Internerd/ha-growatt",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/Internerd/ha-growatt/issues",
+  "requirements": ["pymodbus>=3.6.0"],
+  "version": "0.2.0"
+}
