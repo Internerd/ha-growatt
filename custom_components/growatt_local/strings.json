@@ -11,12 +11,32 @@
           "port": "Port",
           "slave_id": "Slave ID (Modbus unit ID)",
           "scan_interval": "Scan interval (seconds)",
-          "timeout": "Timeout (seconds)"
+          "offline_scan_interval": "Offline scan interval (seconds)",
+          "timeout": "Timeout (seconds)",
+          "invert_grid_power": "Invert grid power",
+          "invert_battery_power": "Invert battery power"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Growatt inverter",
+        "description": "Edit this inverter's connection/polling settings in place.",
+        "data": {
+          "device_name": "Device name",
+          "profile": "Inverter model",
+          "host": "Host / IP address",
+          "port": "Port",
+          "slave_id": "Slave ID (Modbus unit ID)",
+          "scan_interval": "Scan interval (seconds)",
+          "offline_scan_interval": "Offline scan interval (seconds)",
+          "timeout": "Timeout (seconds)",
+          "invert_grid_power": "Invert grid power",
+          "invert_battery_power": "Invert battery power"
         }
       }
     },
     "abort": {
-      "already_configured": "This inverter (host/port/slave ID) is already configured."
+      "already_configured": "This inverter (host/port/slave ID) is already configured.",
+      "reconfigure_successful": "Reconfiguration successful."
     }
   },
   "options": {
@@ -24,7 +44,10 @@
       "init": {
         "data": {
           "scan_interval": "Scan interval (seconds)",
-          "timeout": "Timeout (seconds)"
+          "offline_scan_interval": "Offline scan interval (seconds)",
+          "timeout": "Timeout (seconds)",
+          "invert_grid_power": "Invert grid power",
+          "invert_battery_power": "Invert battery power"
         }
       }
     }

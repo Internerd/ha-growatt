@@ -17,8 +17,12 @@ from homeassistant.core import HomeAssistant
 
 from .const import (
     CONF_DEVICE_NAME,
+    CONF_INVERT_BATTERY_POWER,
+    CONF_INVERT_GRID_POWER,
+    CONF_OFFLINE_SCAN_INTERVAL,
     CONF_PROFILE,
     CONF_SLAVE_ID,
+    DEFAULT_OFFLINE_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_TIMEOUT,
     DOMAIN,
@@ -31,6 +35,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up one inverter from a config entry."""
     options = entry.options or {}
 
+    def _get(key, default):
+        return options.get(key, entry.data.get(key, default))
+
     coordinator = GrowattLocalCoordinator(
         hass,
         device_name=entry.data[CONF_DEVICE_NAME],
@@ -38,8 +45,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         host=entry.data["host"],
         port=entry.data["port"],
         slave_id=entry.data[CONF_SLAVE_ID],
-        scan_interval=options.get("scan_interval", entry.data.get("scan_interval", DEFAULT_SCAN_INTERVAL)),
-        timeout=options.get("timeout", entry.data.get("timeout", DEFAULT_TIMEOUT)),
+        scan_interval=_get("scan_interval", DEFAULT_SCAN_INTERVAL),
+        offline_scan_interval=_get(CONF_OFFLINE_SCAN_INTERVAL, DEFAULT_OFFLINE_SCAN_INTERVAL),
+        timeout=_get("timeout", DEFAULT_TIMEOUT),
+        invert_grid_power=_get(CONF_INVERT_GRID_POWER, False),
+        invert_battery_power=_get(CONF_INVERT_BATTERY_POWER, False),
     )
 
     await coordinator.async_config_entry_first_refresh()
