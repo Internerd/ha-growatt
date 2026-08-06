@@ -6,6 +6,9 @@ support the full Growatt lineup; it exists to serve exactly the two
 inverters it was configured for, with entity IDs matching the previous
 HACS "Growatt_ModbusTCP" integration so existing helpers/automations/
 dashboards keep working unchanged.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
 """
 from __future__ import annotations
 

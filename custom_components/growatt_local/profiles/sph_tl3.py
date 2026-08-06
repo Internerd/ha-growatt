@@ -4,12 +4,17 @@ Register addresses, scale factors and units below are taken from the public,
 MIT-licensed register map published in:
     https://github.com/0xAHA/Growatt_ModbusTCP
     Copyright (c) 2025 0xAHA, MIT License.
+See /NOTICE.md at the repository root for the full attribution.
 
 Only the "legacy" (non-VPP-2.01) register range is included here, since that
-is the range this installation's inverter actually responds on. Time-of-use
-scheduling registers and the read-only "priority_mode" select are
-deliberately omitted - this integration exposes sensors and the two power
-limiting controls only.
+is the range this installation's inverter actually responds on. The
+read-only "priority_mode" register is deliberately omitted (its
+select-entity equivalent is explicitly out of scope for this integration);
+everything else - including time-of-use scheduling - is exposed via
+sensor/number/switch/time entities, see SPH_TL3_TIME_WINDOWS below.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
 """
 
 SPH_TL3_INPUT_REGISTERS = {

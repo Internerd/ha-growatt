@@ -1,4 +1,8 @@
-"""Data update coordinator for a single Growatt inverter."""
+"""Data update coordinator for a single Growatt inverter.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
+"""
 from __future__ import annotations
 
 import logging

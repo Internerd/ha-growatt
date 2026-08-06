@@ -1,4 +1,8 @@
-"""Config flow for Growatt Local."""
+"""Config flow for Growatt Local.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
+"""
 from __future__ import annotations
 
 from typing import Any

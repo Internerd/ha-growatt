@@ -2,6 +2,9 @@
 
 Runs on pymodbus's sync ModbusTcpClient; every call is executed in HA's
 executor thread pool by the coordinator, never on the event loop.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
 """
 from __future__ import annotations
 

@@ -9,6 +9,13 @@ integration, scoped to just what this installation's two inverters
 actually support - but exposes everything the register map has to offer
 for them, not just what was previously wired up.
 
+> **Attribution & AI-assistance disclosure:** register-map data is credited
+> to [0xAHA/Growatt_ModbusTCP](https://github.com/0xAHA/Growatt_ModbusTCP)
+> (MIT License); the code itself was written with AI assistance
+> (Claude/Anthropic, via Claude Code) under human direction and review. See
+> [`/NOTICE.md`](../../NOTICE.md) at the repository root for the full
+> details - every source file links back to it too.
+
 ## What's included
 
 - **Sensors**: power, voltage, current, energy, temperature, battery,
@@ -41,7 +48,16 @@ generated, so existing helpers, automations and dashboards keep working
 without edits - **provided you enter the same device name during setup**
 (see Migration below).
 
-## Fault / warning codes
+## Status / Known limitations
+
+This integration has not been validated against real hardware by an
+independent third party - it was built from the register maps and
+protocol documents cited below, without live access to a Growatt
+inverter. Test carefully, one control at a time, before relying on the
+writable `number`/`switch`/`time` entities, the same caution you'd apply
+to any Modbus integration touching an inverter you depend on.
+
+### Fault / warning codes
 
 `fault_code` and `warning_code` are exposed as plain numeric sensors, same
 as the original integration. I looked for an authoritative code->meaning

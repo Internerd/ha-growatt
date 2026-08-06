@@ -1,4 +1,8 @@
-"""Constants for the Growatt Local integration."""
+"""Constants for the Growatt Local integration.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
+"""
 from homeassistant.const import Platform
 
 DOMAIN = "growatt_local"

@@ -2,6 +2,9 @@
 
 Only the SPH-TL3 profile has these; the MIC profile has an empty
 time_windows list, so no entities are created for it.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
 """
 from __future__ import annotations
 

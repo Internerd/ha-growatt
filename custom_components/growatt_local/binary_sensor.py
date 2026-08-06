@@ -1,4 +1,8 @@
-"""Binary sensor platform for Growatt Local."""
+"""Binary sensor platform for Growatt Local.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
+"""
 from __future__ import annotations
 
 from homeassistant.components.binary_sensor import (

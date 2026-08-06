@@ -5,6 +5,9 @@ automatic slug-from-name behaviour) so that, given the same device name the
 old "Growatt_ModbusTCP" integration entries used, this integration reproduces
 the exact same entity_ids - keeping existing helpers, automations and
 dashboards working without any changes.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
 """
 from __future__ import annotations
 

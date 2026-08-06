@@ -1,4 +1,8 @@
-"""Switch platform for Growatt Local - boolean holding-register controls."""
+"""Switch platform for Growatt Local - boolean holding-register controls.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
+"""
 from __future__ import annotations
 
 from homeassistant.components.switch import SwitchEntity

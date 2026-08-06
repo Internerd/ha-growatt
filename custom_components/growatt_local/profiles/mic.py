@@ -4,9 +4,13 @@ Register addresses, scale factors and units below are taken from the public,
 MIT-licensed register map published in:
     https://github.com/0xAHA/Growatt_ModbusTCP
     Copyright (c) 2025 0xAHA, MIT License.
+See /NOTICE.md at the repository root for the full attribution.
 
 Only the legacy V3.05 register range (0-179) is included, since that is the
 range this installation's inverter actually responds on.
+
+AI-generated (Claude/Anthropic via Claude Code) under human direction and
+review; see /NOTICE.md at the repository root for details.
 """
 
 MIC_INPUT_REGISTERS = {
