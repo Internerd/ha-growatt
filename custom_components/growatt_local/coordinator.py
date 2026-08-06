@@ -109,7 +109,10 @@ class GrowattLocalCoordinator(DataUpdateCoordinator):
         port: int,
         slave_id: int,
         scan_interval: int,
+        offline_scan_interval: int,
         timeout: int,
+        invert_grid_power: bool = False,
+        invert_battery_power: bool = False,
     ) -> None:
         super().__init__(
             hass,
@@ -123,6 +126,11 @@ class GrowattLocalCoordinator(DataUpdateCoordinator):
         self.is_online = False
         self.last_successful_update: datetime | None = None
 
+        self._online_interval = timedelta(seconds=scan_interval)
+        self._offline_interval = timedelta(seconds=offline_scan_interval)
+        self._invert_grid_power = invert_grid_power
+        self._invert_battery_power = invert_battery_power
+
         maps = PROFILE_REGISTER_MAPS[profile]
         self._input_registers = maps["input_registers"]
         self._input_blocks = maps["input_blocks"]
@@ -134,16 +142,26 @@ class GrowattLocalCoordinator(DataUpdateCoordinator):
         try:
             data = await self.hass.async_add_executor_job(self._poll)
         except Exception as err:  # pylint: disable=broad-except
-            self.is_online = False
+            self._set_online(False)
             raise UpdateFailed(f"Error polling {self.device_name}: {err}") from err
 
         if data is None:
-            self.is_online = False
+            self._set_online(False)
             raise UpdateFailed(f"No response from {self.device_name}")
 
-        self.is_online = True
+        self._set_online(True)
         self.last_successful_update = datetime.now()
         return data
+
+    def _set_online(self, online: bool) -> None:
+        """Track reachability and switch polling cadence accordingly.
+
+        Slows down to `offline_scan_interval` while unreachable (avoids
+        hammering a device that's off/unreachable) and back to the normal
+        `scan_interval` once it responds again.
+        """
+        self.is_online = online
+        self.update_interval = self._online_interval if online else self._offline_interval
 
     def _poll(self) -> dict[str, Any] | None:
         """Blocking poll, executed in the HA executor thread pool."""
@@ -177,6 +195,19 @@ class GrowattLocalCoordinator(DataUpdateCoordinator):
 
         if not got_any:
             return None
+
+        # Manual override for inverters/firmware that report grid or
+        # battery power flow with the opposite sign convention than
+        # expected (see the "Invert Grid/Battery Power" options - these
+        # mirror the same-named settings in the original integration).
+        if self._invert_grid_power and "power_to_grid" in result:
+            result["power_to_grid"] = -result["power_to_grid"]
+        if self._invert_battery_power:
+            charge = result.get("battery_charge_power")
+            discharge = result.get("battery_discharge_power")
+            if charge is not None and discharge is not None:
+                result["battery_charge_power"], result["battery_discharge_power"] = discharge, charge
+
         return result
 
     def _find_holding(self, name: str) -> tuple[int, dict] | None:

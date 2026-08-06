@@ -48,6 +48,38 @@ generated, so existing helpers, automations and dashboards keep working
 without edits - **provided you enter the same device name during setup**
 (see Migration below).
 
+## Configuration options
+
+Set at first setup, and editable afterwards via **Settings → Devices &
+Services → Growatt Local → the device → Configure**:
+
+- **Scan interval** - normal polling cadence, in seconds.
+- **Offline scan interval** - polling cadence used while the inverter is
+  unreachable (avoids hammering a device that's off overnight or
+  disconnected); switches back to the normal scan interval as soon as it
+  responds again.
+- **Timeout** - Modbus TCP read/connect timeout, in seconds.
+- **Invert grid power** / **Invert battery power** - manual override for
+  inverters/firmware that report grid or battery power flow with the
+  opposite sign convention than expected (see the note below).
+
+Host, port and slave ID are set at first setup and - if your Home
+Assistant is new enough for the **Reconfigure** action (2024.12+, look for
+it on the integration's entry under Devices & Services) - editable in
+place afterwards too. On older Home Assistant versions without that
+action, remove and re-add the entry instead to change them.
+
+> **On the invert options:** the original integration's `Invert Grid
+> Power` existed as a workaround for a real bug in that project (grid
+> import/export were swapped in some versions - see the Migration
+> Prep discussion this integration grew out of). This integration reads
+> the signed grid-power register directly and shouldn't need it, but the
+> toggle is kept for parity and as an escape hatch. `Invert Battery
+> Power` swaps the charge/discharge power readings - my best-effort
+> interpretation of what that setting is for, since the original
+> project's exact semantics for it weren't verified against source; if
+> your battery power looks backwards, try it.
+
 ## Status / Known limitations
 
 This integration has not been validated against real hardware by an
