@@ -83,10 +83,13 @@ class GrowattLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         Requires a Home Assistant version with the reconfigure-flow API
         (`ConfigFlow._get_reconfigure_entry` /
-        `async_update_reload_and_abort`, available from HA 2024.12+). If
-        your HA is older than that, remove and re-add the integration
+        `_abort_if_unique_id_mismatch`, available from HA 2024.11+ -
+        confirmed against home-assistant/core's config_entries.py history).
+        If your HA is older than that, remove and re-add the integration
         entry instead - the "Configure" (options) flow only covers
         polling/inversion settings, not host/port/slave ID, on any version.
+        This does not gate installing the integration at all - see
+        hacs.json for the actual (much lower) minimum version.
         """
         reconfigure_entry = self._get_reconfigure_entry()
 
