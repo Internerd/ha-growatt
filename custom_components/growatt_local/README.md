@@ -64,10 +64,14 @@ Services → Growatt Local → the device → Configure**:
   opposite sign convention than expected (see the note below).
 
 Host, port and slave ID are set at first setup and - if your Home
-Assistant is new enough for the **Reconfigure** action (2024.12+, look for
+Assistant is new enough for the **Reconfigure** action (2024.11+, look for
 it on the integration's entry under Devices & Services) - editable in
 place afterwards too. On older Home Assistant versions without that
-action, remove and re-add the entry instead to change them.
+action, remove and re-add the entry instead to change them. This is the
+only part of the integration with a version floor above what
+`hacs.json` requires (2023.6.0, set by the `time` platform used for the
+time-of-use scheduling entities) - Reconfigure not being available on
+your version doesn't block installing or using everything else.
 
 > **On the invert options:** the original integration's `Invert Grid
 > Power` existed as a workaround for a real bug in that project (grid

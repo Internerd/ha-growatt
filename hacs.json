@@ -1,5 +1,5 @@
 {
   "name": "Growatt Local (SPH-TL3 / MIC)",
   "render_readme": true,
-  "homeassistant": "2024.12.0"
+  "homeassistant": "2023.6.0"
 }
