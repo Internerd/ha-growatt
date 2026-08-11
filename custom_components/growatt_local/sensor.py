@@ -83,8 +83,14 @@ SPH_TL3_SENSORS: list[tuple[str, str, str, Any, Any, Any, str]] = [
     ("pv2_energy_total", "pv2_energy_total", "PV2 Energy Total", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, UnitOfEnergy.KILO_WATT_HOUR, "mdi:solar-panel"),
     ("pv_energy_total", "pv_energy_total", "PV Energy Total", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, UnitOfEnergy.KILO_WATT_HOUR, "mdi:solar-panel"),
     ("inverter_temp", "inverter_temperature", "Inverter Temperature", SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, UnitOfTemperature.CELSIUS, "mdi:thermometer"),
+    ("ipm_temp", "ipm_temperature", "IPM Temperature", SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, UnitOfTemperature.CELSIUS, "mdi:thermometer"),
+    ("boost_temp", "boost_temperature", "Boost Temperature", SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, UnitOfTemperature.CELSIUS, "mdi:thermometer"),
     ("fault_code", "fault_code", "Fault Code", None, None, None, "mdi:alert-circle-outline"),
     ("warning_code", "warning_code", "Warning Code", None, None, None, "mdi:alert-outline"),
+    ("bms_status", "bms_status", "BMS Status", None, None, None, "mdi:battery-heart-variant"),
+    ("bms_error", "bms_error", "BMS Error", None, None, None, "mdi:battery-alert-variant-outline"),
+    ("bms_cycle_count", "bms_cycle_count", "BMS Cycle Count", None, SensorStateClass.TOTAL_INCREASING, None, "mdi:battery-sync"),
+    ("bms_soh", "bms_soh", "BMS State of Health", None, SensorStateClass.MEASUREMENT, PERCENTAGE, "mdi:battery-heart"),
     ("battery_discharge_power", "battery_discharge_power", "Battery Discharge Power", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, UnitOfPower.WATT, "mdi:battery-minus"),
     ("battery_charge_power", "battery_charge_power", "Battery Charge Power", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, UnitOfPower.WATT, "mdi:battery-plus"),
     ("battery_voltage", "battery_voltage", "Battery Voltage", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, UnitOfElectricPotential.VOLT, "mdi:battery"),
@@ -132,7 +138,7 @@ SENSOR_DEFINITIONS = {
     PROFILE_MIC: MIC_SENSORS,
 }
 
-DIAGNOSTIC_SUFFIXES = {"status", "fault_code", "warning_code", "dry_contact_state"}
+DIAGNOSTIC_SUFFIXES = {"status", "fault_code", "warning_code", "dry_contact_state", "bms_status", "bms_error"}
 
 # (register_key, suffix, name, device_class, state_class, unit, icon) tuples
 # for the fixed sensor list, or None below - the diagnostic holding
