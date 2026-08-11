@@ -25,7 +25,18 @@ This repository is HACS-ready (`hacs.json` at the root). Add it as a
 1. HACS -> the three-dot menu (top right) -> **Custom repositories**.
 2. Repository: `Internerd/ha-growatt`, Category: **Integration**.
 3. Find "Growatt Local (SPH-TL3 / MIC)" in HACS and install it.
-4. Restart Home Assistant, then follow the migration steps below.
+4. Restart Home Assistant, then follow the
+   [migration steps](custom_components/growatt_local/README.md#migration-from-growatt_modbustcp)
+   in the component README if you're replacing the original
+   `Growatt_ModbusTCP` integration.
+
+## Contributing
+
+Issues and pull requests are welcome - see [CONTRIBUTING.md](CONTRIBUTING.md)
+for scope/register-map guidelines, [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+for how discussion here is expected to go, and [SECURITY.md](SECURITY.md)
+for reporting an actual vulnerability (as opposed to "Modbus has no
+built-in auth," which is the protocol, not a bug here).
 
 ## Status / disclaimer
 
@@ -37,5 +48,3 @@ physically access. See [NOTICE.md](NOTICE.md) for how this project was
 built and [`custom_components/growatt_local/README.md`](custom_components/growatt_local/README.md#status--known-limitations)
 for known limitations (e.g. fault/warning codes are shown numerically,
 not translated to text - see why in that section).
-
-Issues and pull requests are welcome.

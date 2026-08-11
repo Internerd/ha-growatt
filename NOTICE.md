@@ -32,6 +32,14 @@ beyond the universally-documented "0 = none". See
 [`custom_components/growatt_local/README.md`](custom_components/growatt_local/README.md#fault--warning-codes)
 for details.
 
+This repository's register maps were last checked against upstream
+`0xAHA/Growatt_ModbusTCP` version **v1.5.5** and updated with the
+SPH-TL3-specific additions that version introduced (IPM/Boost temperature,
+BMS status/error/cycle count/SOH - see
+[`custom_components/growatt_local/README.md`](custom_components/growatt_local/README.md#keeping-in-sync-with-upstream)
+for what was and wasn't pulled in and why). Same MIT attribution as above
+applies to that data.
+
 ## 2. AI-assistance disclosure
 
 Most of the code and documentation in this repository was written with the
@@ -72,3 +80,49 @@ and AI system interactions rather than source code repositories
 specifically, but this repository follows that spirit by disclosing AI
 involvement clearly and by file, rather than presenting the code as
 entirely human-written.
+
+## 3. Rechtliche Hinweise für Deutschland
+
+Dieser Abschnitt richtet sich an deutsche Nutzer/Mitwirkende und ist eine
+sachliche Einordnung, **keine Rechtsberatung**. Bei konkreten rechtlichen
+Fragen (insbesondere kommerzielle Nutzung, Haftungsfälle, Streitigkeiten)
+bitte anwaltlichen Rat einholen.
+
+**Impressumspflicht.** Dieses Repository ist ein privates,
+nicht-kommerzielles Hobby-Projekt ohne Spenden-, Sponsoring- oder
+Werbelinks. Nach überwiegender Auffassung zur "geschäftsmäßigen"
+Bereitstellung von Telemedien (§ 5 Digitale-Dienste-Gesetz, DDG - vormals
+§ 5 TMG) besteht für rein private, nicht-kommerzielle Angebote ohne
+regelmäßige geschäftliche Ausrichtung in der Regel keine
+Impressumspflicht. Diese Einschätzung ist einzelfallabhängig und nicht
+abschließend geklärt; sie sollte neu bewertet werden, falls sich der
+Charakter des Projekts ändert (z. B. durch Spenden-Buttons, gewerbliche
+Nutzung oder Ähnliches - das Original-Upstream-Projekt hat z. B. einen
+"Buy Me A Coffee"-Link, dieses Repository bewusst nicht).
+
+**Gewährleistungs-/Haftungsausschluss.** Die MIT-Lizenz (`LICENSE`)
+schließt Gewährleistung und Haftung im üblichen englischsprachigen
+"AS IS"-Text weitgehend aus. Nach deutschem Recht kann Haftung für
+Vorsatz nicht im Voraus wirksam ausgeschlossen werden (§ 276 Abs. 3 BGB).
+Da diese Software unentgeltlich überlassen wird, greift ohnehin die
+Haftungsprivilegierung für Schenkungen/unentgeltliche Überlassung
+(§§ 521, 523 f. BGB entsprechend), die Haftung im Regelfall auf Vorsatz
+und grobe Fahrlässigkeit beschränkt. Der Lizenztext ist vor diesem
+Hintergrund zu verstehen, nicht als absoluter Freibrief für jeden
+denkbaren Schaden.
+
+**Sicherheits-/Netzbetreiber-Hinweis.** Diese Integration kann
+netzrelevante Wechselrichter-Einstellungen schreiben (z. B.
+Einspeise-/Exportlimit, Batterie-Lade-/Entladeleistung, Zeitfenster). Du
+bist selbst dafür verantwortlich, dass Änderungen an diesen Einstellungen
+mit den Vorgaben deines Netzbetreibers und den technischen
+Anschlussbedingungen (z. B. VDE-AR-N 4105 bzw. die für deinen Anschluss
+geltende Fassung) vereinbar bleiben. Siehe auch `SECURITY.md` zum Thema
+Modbus TCP ohne eingebaute Authentifizierung.
+
+**KI-generierter Inhalt.** Eine eigenständige gesetzliche
+Kennzeichnungspflicht speziell für KI-generierten Quellcode ist nach
+aktuellem Kenntnisstand (siehe Datum dieses Commits) im deutschen Recht
+nicht bekannt; die Offenlegung in Abschnitt 2 erfolgt freiwillig aus
+Transparenzgründen, orientiert am Transparenzgedanken der EU-KI-Verordnung
+(Art. 50).

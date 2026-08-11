@@ -78,6 +78,11 @@ SPH_TL3_INPUT_REGISTERS = {
 
     # Temperature
     93: {"name": "inverter_temp", "scale": 0.1, "unit": "°C", "signed": True},
+    # ipm_temp/boost_temp: added in upstream v1.5.3 (were mapped in the
+    # sensor list but the registers themselves were missing, so both read
+    # a permanent 0.0 - confirmed against real hardware in upstream #360).
+    94: {"name": "ipm_temp", "scale": 0.1, "unit": "°C", "signed": True},
+    95: {"name": "boost_temp", "scale": 0.1, "unit": "°C", "signed": True},
 
     # Status codes
     105: {"name": "fault_code", "scale": 1, "unit": ""},
@@ -91,6 +96,16 @@ SPH_TL3_INPUT_REGISTERS = {
     1013: {"name": "battery_voltage", "scale": 0.1, "unit": "V"},
     1014: {"name": "battery_soc", "scale": 1, "unit": "%"},
     1040: {"name": "battery_temp", "scale": 0.1, "unit": "°C", "signed": True},
+
+    # BMS block: added in upstream v1.4.x (V1.39 "BMS information" range,
+    # 1082-1124). These are INPUT registers; the HOLDING registers at the
+    # same numeric addresses 1083/1085 are this profile's Grid First time
+    # period 8 start/enable (see SPH_TL3_HOLDING_REGISTERS) - different
+    # Modbus function code, unrelated meaning, not a conflict.
+    1083: {"name": "bms_status", "scale": 1, "unit": ""},
+    1085: {"name": "bms_error", "scale": 1, "unit": ""},
+    1095: {"name": "bms_cycle_count", "scale": 1, "unit": ""},
+    1096: {"name": "bms_soh", "scale": 1, "unit": "%"},
 
     1021: {"name": "power_to_user_high", "pair": 1022},
     1022: {"name": "power_to_user_low", "pair": 1021, "combined_scale": 0.1, "combined_unit": "W"},
@@ -132,9 +147,10 @@ SPH_TL3_INPUT_BLOCKS = [
     (0, 15),      # 0-14: status, PV total, PV1-3
     (37, 13),     # 37-49: AC grid + 3-phase
     (53, 14),     # 53-66: energy today/total, per-string energy
-    (91, 3),      # 91-93: PV energy total, inverter temp
+    (91, 5),      # 91-95: PV energy total, inverter/IPM/boost temp
     (105, 8),     # 105-112: fault/warning codes
     (1009, 6),    # 1009-1014: battery power/voltage/soc
+    (1083, 14),   # 1083-1096: BMS status/error/cycle count/SOH
     (1021, 2),    # 1021-1022: power to user
     (1029, 2),    # 1029-1030: power to grid
     (1037, 3),    # 1037-1039: power to load, self-consumption %

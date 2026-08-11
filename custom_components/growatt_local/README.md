@@ -80,6 +80,18 @@ action, remove and re-add the entry instead to change them.
 > project's exact semantics for it weren't verified against source; if
 > your battery power looks backwards, try it.
 
+## Keeping in sync with upstream
+
+This integration doesn't auto-update from `0xAHA/Growatt_ModbusTCP` - it's
+a one-time fork of the register *data*, not a dependency. New upstream
+releases get checked manually and merged in if they add something
+relevant to the SPH-TL3/MIC profiles.
+
+| Upstream version checked | What was relevant | Added here |
+|---|---|---|
+| v0.5.0 (installed at the time) | baseline this integration was built from | everything |
+| v1.5.5 | SPH-TL3 gains IPM/Boost temperature (registers 94/95, upstream v1.5.3) and BMS status/error/cycle count/SOH (registers 1083/1085/1095/1096, upstream v1.4.x). Nothing new for MIC. Everything else in v0.5.0→v1.5.5 (VPP/reactive-power fixes, MIN/MIC auto-detection, new profiles for other models, translations, block-size options, repairs) is either specific to models/register ranges this integration doesn't use, or specific to the original project's own auto-detection/generic sensor code that this integration doesn't share. | `ipm_temp`, `boost_temp`, `bms_status`, `bms_error`, `bms_cycle_count`, `bms_soh` sensors |
+
 ## Status / Known limitations
 
 This integration has not been validated against real hardware by an
