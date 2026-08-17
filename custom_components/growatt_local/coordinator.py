@@ -296,12 +296,15 @@ class GrowattLocalCoordinator(DataUpdateCoordinator):
 
         solar = get("pv_total_power")
         export = get("power_to_grid")
-        # Prefer whichever of the two documented grid-import registers
-        # actually carries a value on this firmware (see the 1015/1021
-        # comment in the SPH-TL3 profile).
-        import_power = get("power_to_user") or get("power_to_user_legacy")
-        if "power_to_user" in result:
-            result["power_to_user"] = import_power
+        # Growatt documents grid import at two addresses and firmware
+        # differs on which it fills. 1021/1022 ("PactouserTotal") is the
+        # newer one and wins whenever the read succeeded - including when
+        # it reports a legitimate zero, which on a hybrid covering its own
+        # load is a normal state rather than a missing value. The older
+        # 1015/1016 pair is only consulted where the newer one is absent.
+        if "power_to_user" not in result and "power_to_user_legacy" in result:
+            result["power_to_user"] = result["power_to_user_legacy"]
+        import_power = get("power_to_user")
         load = get("power_to_load")
         charge = get("battery_charge_power")
         discharge = get("battery_discharge_power")

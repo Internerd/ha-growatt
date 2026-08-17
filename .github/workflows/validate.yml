@@ -1,0 +1,38 @@
+name: Validate
+
+# The two checks a HACS integration is expected to pass: HACS's own
+# repository-structure check, and Home Assistant's hassfest, which
+# validates manifest.json/strings.json against the current core.
+#
+# The weekly schedule matters more than it looks: both validators track
+# Home Assistant releases, so a repository that passed on merge can start
+# failing months later without a single commit. The cron catches that.
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+jobs:
+  hacs:
+    name: HACS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: integration
+          # Skipped deliberately: "brands" requires the domain to be
+          # registered in home-assistant/brands, which is for integrations
+          # published to the public HACS default list. This one is
+          # installed as a custom repository.
+          ignore: brands
+
+  hassfest:
+    name: hassfest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master

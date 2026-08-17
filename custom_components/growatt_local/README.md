@@ -198,35 +198,45 @@ Status and derating codes *are* documented and are translated:
 SPH-TL3 and the V3.05 grid-tied table on MIC, and
 `sensor.<device>_derating_mode` renders all 22 documented derating reasons.
 
-### The calculated grid/consumption sensors need working power-flow registers
+### The calculated grid/consumption sensors, and when their fallback fires
 
 `grid_power`, `grid_export_power`, `grid_import_power`, `self_consumption`,
 `self_consumption_percentage` and `house_consumption` are not registers -
 upstream calculates all six from `power_to_grid` (1029/1030),
 `power_to_user` (1015/1016 or 1021/1022) and `power_to_load` (1037/1038),
-falling back to an energy balance over PV and battery power when those read
-zero.
+falling back to an energy balance over PV and battery power when *both*
+directional registers read zero.
 
-**On the SPH-TL3 this was checked against, all three read 0/10/20 W and
-never anything else** - 24 hours of recorder history, right through a day
-with 900 W of PV and a discharging battery. If yours behaves the same way,
-every one of those six sensors rests on the fallback, which cannot tell
-house load apart from export without at least one of them: it attributes
-`PV + battery discharge` to the grid and will report ~1.8 kW of *export*
-while the house is actually consuming it.
+On the SPH-TL3 checked here those registers work: over ten days of
+statistics `power_to_grid` peaks at 4.0-5.5 kW every single day and
+`power_to_user` at 0.9-2.9 kW, so the direct path is what runs almost all
+of the time.
 
-Symptoms to look for: `grid_export_power` tracking your PV output on a day
-you know you imported, or `house_consumption` flipping between ~10 W and
-your full load between polls. **Do not wire these into the Energy Dashboard
-before checking them against your meter for a day.** The registers that are
-real - `power_to_grid`, `power_to_user`, `power_to_load`,
-`energy_to_grid_*`, `grid_import_energy_*`, `load_energy_*`, and the
-battery pair - are the ones to trust, and the daily/lifetime energy
-counters are unaffected by any of this.
+The fallback still has a blind spot worth knowing about. It fires exactly
+when export and import are both zero - which on a hybrid is a completely
+normal state, not an error: PV plus battery covering the house load
+precisely. In that moment the formula `(PV + discharge) - (load + charge)`
+attributes everything the battery is supplying to the grid, so at 04:00
+with no sun and 900 W coming out of the battery it can report ~900 W of
+*export*. It is a short-lived artefact around the zero crossing rather than
+a permanently wrong sensor, but if you build an automation on
+`grid_export_power` being non-zero, that is where it will misfire.
 
-The one thing this integration does beyond upstream here is read *both*
-documented grid-import registers (1015/1016 as well as 1021/1022) and
-prefer whichever is non-zero, since firmware differs on which one it fills.
+The daily and lifetime energy counters (`energy_to_grid_*`,
+`grid_import_energy_*`, `load_energy_*`) are read straight from registers
+and are unaffected.
+
+Two things here differ from upstream. Both documented grid-import registers
+are read (1015/1016 as well as 1021/1022) with 1021/1022 preferred and the
+older pair used only where the newer one is absent, since firmware differs
+on which is populated. And `power_to_load` is read from 1037/1038, the
+register the protocol assigns to it - note that the old integration
+reported identical values for `power_to_load` and `power_to_user` on this
+hardware (their daily maxima match to the watt across ten days), which
+suggests it was serving both from one register. Which of the two is right
+needs a look at the inverter display; if your `power_to_load` reads 0 while
+the house is drawing power, 1037/1038 is the backup/EPS port on your model
+and nothing is wired to it.
 
 ### `ac_charge_energy_total` on SPH-TL3
 
