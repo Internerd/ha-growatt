@@ -6,8 +6,15 @@ MIT-licensed register map published in:
     Copyright (c) 2025 0xAHA, MIT License.
 See /NOTICE.md at the repository root for the full attribution.
 
-Only the legacy V3.05 register range (0-179) is included, since that is the
-range this installation's inverter actually responds on.
+The legacy V3.05 register range (0-179) is always polled. The VPP Protocol
+V2.01 overlay (30000+) is polled only when the "Protocol V2.01 (VPP)"
+option is enabled on the config entry.
+
+Deliberately absent, because this model has no register for them: PV string
+2, boost-converter temperature, and any battery/grid-flow value. The
+upstream integration creates those entities anyway (they come from a sensor
+group shared with larger models) and they report a permanent 0 - the exact
+failure mode upstream's own profile notes warn against.
 
 AI-generated (Claude/Anthropic via Claude Code) under human direction and
 review; see /NOTICE.md at the repository root for details.
@@ -45,6 +52,9 @@ MIC_INPUT_REGISTERS = {
 
     40: {"name": "fault_code", "scale": 1, "unit": ""},
     64: {"name": "warning_code", "scale": 1, "unit": ""},
+
+    # Derating mode - why the inverter is currently limiting its output.
+    104: {"name": "derating_mode", "scale": 1, "unit": ""},
 }
 
 # Register blocks to poll: (start_address, count)
@@ -56,7 +66,14 @@ MIC_INPUT_BLOCKS = [
     (40, 1),     # 40: fault code
     (41, 1),     # 41: IPM temp
     (64, 1),     # 64: warning code
+    (104, 1),    # 104: derating mode
 ]
+
+# The MIC has no battery, so its AC energy counters really are solar-only
+# and are read straight from registers 26-29.
+MIC_USE_MPPT_ENERGY_TODAY = False
+
+_ENABLE_OPTIONS = {0: "Disabled", 1: "Enabled"}
 
 # See SPH_TL3_HOLDING_REGISTERS in sph_tl3.py for what "control_type" and
 # "enabled_default" mean. Note: holding register 30 ("com_address" - the
@@ -64,15 +81,25 @@ MIC_INPUT_BLOCKS = [
 # it from Home Assistant risks the inverter switching to an address this
 # integration is no longer configured for, silently losing the connection.
 MIC_HOLDING_REGISTERS = {
-    0: {"name": "on_off", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
-    2: {"name": "pf_cmd_memory", "scale": 1, "unit": "", "access": "RW", "control_type": "switch"},
+    # Not exposed upstream; opt-in here for the same reason as on SPH-TL3.
+    0: {"name": "on_off", "scale": 1, "unit": "", "access": "RW", "control_type": "select",
+        "options": {0: "Off", 1: "On"}, "enabled_default": False},
+
+    # Register 2 is the power-factor command memory flag. The upstream
+    # integration matches register 2 against its SPF "charge_config" control
+    # and creates a "Charge Config" select with solar/utility options on
+    # this hardware, which is a different register's meaning on a model with
+    # no battery at all. Named for what it actually is here.
+    2: {"name": "pf_cmd_memory", "scale": 1, "unit": "", "access": "RW", "control_type": "select",
+        "options": _ENABLE_OPTIONS, "enabled_default": False},
 
     # Max output active power percentage (0-100%). This is the single
-    # physical control on this inverter family - the upstream integration
-    # exposes it twice under two different entity names ("Active Power
-    # Rate" and "Max Output Power Rate") which both write the same
-    # register; this integration exposes it once, as "Max Output Power
-    # Rate", matching the entity that was actually functioning.
+    # physical control on this inverter family. The upstream register map
+    # calls register 3 "active_power_rate" but its writable-control table
+    # binds the name "Max Output Power Rate" to it, and binds
+    # "Active Power Rate" to register 201 - which this model does not have.
+    # Older releases created both entities anyway; only this one ever wrote
+    # to a real register.
     3: {"name": "max_output_power_rate", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100},
 
     4: {"name": "reactive_power_rate", "scale": 1, "unit": "%", "access": "RW", "control_type": "number", "min": -100, "max": 100, "enabled_default": False},
@@ -81,14 +108,34 @@ MIC_HOLDING_REGISTERS = {
     3000: {"name": "export_limit_failed_power_rate", "scale": 0.1, "unit": "%", "access": "RW", "control_type": "number", "min": 0, "max": 100, "enabled_default": False},
 
     # Safety/compliance diagnostic registers (read-only)
-    235: {"name": "ntognd_detect", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
-    236: {"name": "nonstd_vac_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
-    237: {"name": "enable_spec_set", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
-    238: {"name": "fast_mppt_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic"},
+    235: {"name": "ntognd_detect", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic", "enabled_default": False},
+    236: {"name": "nonstd_vac_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic", "enabled_default": False},
+    237: {"name": "enable_spec_set", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic", "enabled_default": False},
+    238: {"name": "fast_mppt_enable", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic", "enabled_default": False},
 }
 
 MIC_HOLDING_BLOCKS = [
     (0, 6),        # 0-5: on_off, pf_cmd_memory, max_output_power_rate, reactive_power_rate, power_factor
     (235, 4),      # 235-238: safety/compliance diagnostics
     (3000, 1),     # export_limit_failed_power_rate
+]
+
+# ---------------------------------------------------------------------------
+# VPP Protocol V2.01 overlay (only polled when the option is enabled).
+# The MIC V2.01 map carries the control-authority gate but no export-limit
+# pair - that block is hybrid-only.
+# ---------------------------------------------------------------------------
+
+MIC_V201_INPUT_REGISTERS: dict[int, dict] = {}
+MIC_V201_INPUT_BLOCKS: list[tuple[int, int]] = []
+
+MIC_V201_HOLDING_REGISTERS = {
+    30099: {"name": "protocol_version", "scale": 1, "unit": "", "access": "R", "control_type": "diagnostic",
+            "enabled_default": False},
+    30100: {"name": "control_authority", "scale": 1, "unit": "", "access": "RW", "control_type": "select",
+            "options": _ENABLE_OPTIONS},
+}
+
+MIC_V201_HOLDING_BLOCKS = [
+    (30099, 2),
 ]

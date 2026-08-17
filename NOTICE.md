@@ -47,7 +47,8 @@ assistance of an AI coding assistant (**Claude**, by Anthropic, via
 Claude Code), directed and reviewed by the repository owner. Concretely:
 
 - Config flow, coordinator, Modbus client, and all entity platforms
-  (`sensor.py`, `number.py`, `switch.py`, `time.py`, `binary_sensor.py`)
+  (`sensor.py`, `number.py`, `select.py`, `time.py`, `binary_sensor.py`,
+  `diagnostics.py`)
   were AI-generated based on the register maps cited above and Home
   Assistant's public developer documentation.
 - The register map *data* (addresses/scale/units) was extracted from the
@@ -55,7 +56,7 @@ Claude Code), directed and reviewed by the repository owner. Concretely:
 - This integration has **not** been tested against a live Growatt
   inverter by the AI (no such access exists in that environment); testing
   was/should be done manually by the repository owner before relying on it,
-  especially before using any of the writable `number`/`switch`/`time`
+  especially before using any of the writable `number`/`select`/`time`
   controls.
 - Every source file carries a short note pointing back to this file.
 

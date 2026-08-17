@@ -10,11 +10,17 @@
           "host": "Host / IP address",
           "port": "Port",
           "slave_id": "Slave ID (Modbus unit ID)",
+          "protocol_v201": "Protocol V2.01 (VPP) registers",
           "scan_interval": "Scan interval (seconds)",
           "offline_scan_interval": "Offline scan interval (seconds)",
           "timeout": "Timeout (seconds)",
+          "block_size": "Max registers per request",
           "invert_grid_power": "Invert grid power",
           "invert_battery_power": "Invert battery power"
+        },
+        "data_description": {
+          "protocol_v201": "Also poll the 30000+/31000+ VPP register range. Adds battery state of health, signed battery power, the VPP export limit control and the control-authority gate. Enable only if your inverter answers on that range - if it does not, the extra reads simply fail and the entities stay unavailable.",
+          "block_size": "Lower this if your RS485-to-TCP gateway rejects long reads (symptom: every sensor unavailable while the inverter itself is reachable). \"auto\" uses the block layout from the register map."
         }
       },
       "reconfigure": {
@@ -26,9 +32,11 @@
           "host": "Host / IP address",
           "port": "Port",
           "slave_id": "Slave ID (Modbus unit ID)",
+          "protocol_v201": "Protocol V2.01 (VPP) registers",
           "scan_interval": "Scan interval (seconds)",
           "offline_scan_interval": "Offline scan interval (seconds)",
           "timeout": "Timeout (seconds)",
+          "block_size": "Max registers per request",
           "invert_grid_power": "Invert grid power",
           "invert_battery_power": "Invert battery power"
         }
@@ -46,6 +54,7 @@
           "scan_interval": "Scan interval (seconds)",
           "offline_scan_interval": "Offline scan interval (seconds)",
           "timeout": "Timeout (seconds)",
+          "block_size": "Max registers per request",
           "invert_grid_power": "Invert grid power",
           "invert_battery_power": "Invert battery power"
         }

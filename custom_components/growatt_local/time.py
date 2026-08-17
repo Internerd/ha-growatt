@@ -13,6 +13,7 @@ from datetime import time as dt_time
 from homeassistant.components.time import TimeEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
@@ -37,6 +38,9 @@ async def async_setup_entry(
         entities.append(
             GrowattTimeEntity(coordinator, config_entry, device_slug, suffix, "end", f"{label} End", end_reg, enabled_default)
         )
+    # The enable flag that goes with each window lives on the select
+    # platform (see SPH_TL3_HOLDING_REGISTERS); a window with both times set
+    # but its flag off is inert.
     async_add_entities(entities)
 
 
@@ -45,6 +49,7 @@ class GrowattTimeEntity(CoordinatorEntity, TimeEntity):
 
     _attr_has_entity_name = True
     _attr_icon = "mdi:clock-time-four-outline"
+    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(
         self,

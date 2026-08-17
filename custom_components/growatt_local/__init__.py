@@ -16,12 +16,16 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .const import (
+    BLOCK_SIZE_OPTIONS,
+    CONF_BLOCK_SIZE,
     CONF_DEVICE_NAME,
     CONF_INVERT_BATTERY_POWER,
     CONF_INVERT_GRID_POWER,
     CONF_OFFLINE_SCAN_INTERVAL,
     CONF_PROFILE,
+    CONF_PROTOCOL_V201,
     CONF_SLAVE_ID,
+    DEFAULT_BLOCK_SIZE,
     DEFAULT_OFFLINE_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_TIMEOUT,
@@ -50,6 +54,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         timeout=_get("timeout", DEFAULT_TIMEOUT),
         invert_grid_power=_get(CONF_INVERT_GRID_POWER, False),
         invert_battery_power=_get(CONF_INVERT_BATTERY_POWER, False),
+        # Which entities exist depends on this one, so it comes from
+        # entry.data (set in the config/reconfigure flow) rather than
+        # options - changing it recreates the entity set.
+        protocol_v201=entry.data.get(CONF_PROTOCOL_V201, False),
+        block_size=BLOCK_SIZE_OPTIONS.get(_get(CONF_BLOCK_SIZE, DEFAULT_BLOCK_SIZE), 0),
     )
 
     await coordinator.async_config_entry_first_refresh()
