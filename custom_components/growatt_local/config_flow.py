@@ -13,12 +13,16 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
+    BLOCK_SIZE_OPTIONS,
+    CONF_BLOCK_SIZE,
     CONF_DEVICE_NAME,
     CONF_INVERT_BATTERY_POWER,
     CONF_INVERT_GRID_POWER,
     CONF_OFFLINE_SCAN_INTERVAL,
     CONF_PROFILE,
+    CONF_PROTOCOL_V201,
     CONF_SLAVE_ID,
+    DEFAULT_BLOCK_SIZE,
     DEFAULT_OFFLINE_SCAN_INTERVAL,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
@@ -34,12 +38,17 @@ CONNECTION_FIELDS = {
     vol.Required("host"): str,
     vol.Required("port", default=DEFAULT_PORT): int,
     vol.Required(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): int,
+    vol.Required(CONF_PROTOCOL_V201, default=False): bool,
 }
 
 POLLING_FIELDS = {
     vol.Required("scan_interval", default=DEFAULT_SCAN_INTERVAL): int,
     vol.Required(CONF_OFFLINE_SCAN_INTERVAL, default=DEFAULT_OFFLINE_SCAN_INTERVAL): int,
     vol.Required("timeout", default=DEFAULT_TIMEOUT): int,
+    # Keyed by string on purpose: the HA frontend submits select values as
+    # strings, so an int-keyed vol.In can never match and the form refuses
+    # to save.
+    vol.Required(CONF_BLOCK_SIZE, default=DEFAULT_BLOCK_SIZE): vol.In(list(BLOCK_SIZE_OPTIONS)),
 }
 
 INVERT_FIELDS = {
@@ -139,6 +148,10 @@ class GrowattLocalOptionsFlow(config_entries.OptionsFlow):
                     "timeout",
                     default=current.get("timeout", DEFAULT_TIMEOUT),
                 ): int,
+                vol.Required(
+                    CONF_BLOCK_SIZE,
+                    default=current.get(CONF_BLOCK_SIZE, DEFAULT_BLOCK_SIZE),
+                ): vol.In(list(BLOCK_SIZE_OPTIONS)),
                 vol.Required(
                     CONF_INVERT_GRID_POWER,
                     default=current.get(CONF_INVERT_GRID_POWER, False),

@@ -1,0 +1,64 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Growatt-Wechselrichter hinzufügen",
+        "description": "Verbindungsdaten für einen Wechselrichter eingeben. Damit vorhandene Helfer und Automationen weiter funktionieren, denselben Gerätenamen wie in der bisherigen Integration verwenden (z. B. \"Growatt-SPH-10K\" oder \"Growatt-MIC1500\").",
+        "data": {
+          "device_name": "Gerätename",
+          "profile": "Wechselrichter-Modell",
+          "host": "Host / IP-Adresse",
+          "port": "Port",
+          "slave_id": "Slave-ID (Modbus-Unit-ID)",
+          "protocol_v201": "Protokoll-V2.01-Register (VPP)",
+          "scan_interval": "Abfrageintervall (Sekunden)",
+          "offline_scan_interval": "Abfrageintervall offline (Sekunden)",
+          "timeout": "Zeitüberschreitung (Sekunden)",
+          "block_size": "Maximale Register pro Anfrage",
+          "invert_grid_power": "Netzleistung invertieren",
+          "invert_battery_power": "Batterieleistung invertieren"
+        },
+        "data_description": {
+          "protocol_v201": "Fragt zusätzlich den VPP-Registerbereich 30000+/31000+ ab. Liefert Batteriegesundheit (SOH), vorzeichenbehaftete Batterieleistung, die VPP-Einspeisebegrenzung und die Steuerungsfreigabe. Nur aktivieren, wenn der Wechselrichter auf diesem Bereich antwortet - andernfalls schlagen die zusätzlichen Lesevorgänge einfach fehl und die Entitäten bleiben nicht verfügbar.",
+          "block_size": "Verringern, wenn das RS485-auf-TCP-Gateway lange Lesevorgänge ablehnt (Symptom: alle Sensoren nicht verfügbar, obwohl der Wechselrichter erreichbar ist). \"auto\" verwendet die Blockaufteilung aus der Registerkarte."
+        }
+      },
+      "reconfigure": {
+        "title": "Growatt-Wechselrichter neu konfigurieren",
+        "description": "Verbindungs- und Abfrageeinstellungen dieses Wechselrichters direkt bearbeiten.",
+        "data": {
+          "device_name": "Gerätename",
+          "profile": "Wechselrichter-Modell",
+          "host": "Host / IP-Adresse",
+          "port": "Port",
+          "slave_id": "Slave-ID (Modbus-Unit-ID)",
+          "protocol_v201": "Protokoll-V2.01-Register (VPP)",
+          "scan_interval": "Abfrageintervall (Sekunden)",
+          "offline_scan_interval": "Abfrageintervall offline (Sekunden)",
+          "timeout": "Zeitüberschreitung (Sekunden)",
+          "block_size": "Maximale Register pro Anfrage",
+          "invert_grid_power": "Netzleistung invertieren",
+          "invert_battery_power": "Batterieleistung invertieren"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieser Wechselrichter (Host/Port/Slave-ID) ist bereits eingerichtet.",
+      "reconfigure_successful": "Neukonfiguration erfolgreich."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Abfrageintervall (Sekunden)",
+          "offline_scan_interval": "Abfrageintervall offline (Sekunden)",
+          "timeout": "Zeitüberschreitung (Sekunden)",
+          "block_size": "Maximale Register pro Anfrage",
+          "invert_grid_power": "Netzleistung invertieren",
+          "invert_battery_power": "Batterieleistung invertieren"
+        }
+      }
+    }
+  }
+}

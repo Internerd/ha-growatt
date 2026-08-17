@@ -9,17 +9,26 @@ from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
-from .const import CONF_DEVICE_NAME, CONF_PROFILE, DOMAIN, display_name, entity_suffix
-from .coordinator import GrowattLocalCoordinator, PROFILE_REGISTER_MAPS
+from .const import (
+    CONF_DEVICE_NAME,
+    CONF_PROFILE,
+    CONF_PROTOCOL_V201,
+    DOMAIN,
+    display_name,
+    entity_suffix,
+)
+from .coordinator import GrowattLocalCoordinator, register_map_for
 
 ICONS = {
-    "export_limit_power": "mdi:transmission-tower-export",
+    "export_limit_power": "mdi:speedometer",
+    "vpp_export_limit_power_rate": "mdi:transmission-tower-export",
     "max_output_power_rate": "mdi:speedometer",
-    "load_first_battery_minimum_soc": "mdi:battery-arrow-down",
+    "load_first_battery_minimum_soc": "mdi:battery-sync",
     "discharge_power_rate": "mdi:battery-minus",
     "discharge_stopped_soc": "mdi:battery-arrow-down",
     "charge_power_rate": "mdi:battery-plus",
@@ -39,11 +48,14 @@ async def async_setup_entry(
 ) -> None:
     coordinator: GrowattLocalCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     device_slug = slugify(config_entry.data[CONF_DEVICE_NAME])
-    holding_registers = PROFILE_REGISTER_MAPS[config_entry.data[CONF_PROFILE]]["holding_registers"]
+    maps = register_map_for(
+        config_entry.data[CONF_PROFILE],
+        config_entry.data.get(CONF_PROTOCOL_V201, False),
+    )
 
     entities = [
         GrowattNumber(coordinator, config_entry, device_slug, register_key, meta)
-        for register_key, meta in holding_registers.items()
+        for register_key, meta in maps["holding_registers"].items()
         if meta.get("control_type") == "number"
     ]
     async_add_entities(entities)
@@ -53,7 +65,8 @@ class GrowattNumber(CoordinatorEntity, NumberEntity):
     """A writable numeric (percentage/SOC/rate) holding register."""
 
     _attr_has_entity_name = True
-    _attr_mode = NumberMode.BOX
+    _attr_mode = NumberMode.SLIDER
+    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(
         self,

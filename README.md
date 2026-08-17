@@ -4,7 +4,8 @@ A self-contained Home Assistant custom integration for exactly two
 Growatt inverters (SPH-TL3 and MIC series) via Modbus TCP - a drop-in
 replacement for the HACS `Growatt_ModbusTCP` integration, scoped to just
 what this installation uses, but exposing everything its register map has
-to offer for those two models (sensors, number/switch/time controls).
+to offer for those two models (sensors, number/select/time controls),
+including the optional VPP Protocol V2.01 register range.
 
 **License:** [MIT](LICENSE). **Attribution & AI-assistance disclosure:**
 [NOTICE.md](NOTICE.md) - read this before reusing, forking, or judging where
@@ -48,3 +49,9 @@ physically access. See [NOTICE.md](NOTICE.md) for how this project was
 built and [`custom_components/growatt_local/README.md`](custom_components/growatt_local/README.md#status--known-limitations)
 for known limitations (e.g. fault/warning codes are shown numerically,
 not translated to text - see why in that section).
+
+If you are replacing an existing `Growatt_ModbusTCP` install, read
+[Entities that do not come back unchanged](custom_components/growatt_local/README.md#entities-that-do-not-come-back-unchanged)
+first: entity IDs are reproduced exactly, with a short, documented list of
+exceptions where the old entity pointed at a register that does not exist
+on these models.

@@ -25,6 +25,37 @@ data structures. All other code (config flow, coordinator, Modbus client,
 entity platforms, documentation) is an independent implementation written
 for this repository.
 
+Whether register addresses and scale factors are copyrightable at all is
+doubtful - they are factual descriptions of how a third party's hardware
+behaves. The upstream license is reproduced in full below regardless, so
+that the question never has to be answered to reuse this repository:
+
+> MIT License
+>
+> Copyright (c) 2025 0xAHA
+>
+> Permission is hereby granted, free of charge, to any person obtaining a copy
+> of this software and associated documentation files (the "Software"), to deal
+> in the Software without restriction, including without limitation the rights
+> to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+> copies of the Software, and to permit persons to whom the Software is
+> furnished to do so, subject to the following conditions:
+>
+> The above copyright notice and this permission notice shall be included in all
+> copies or substantial portions of the Software.
+>
+> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+> IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+> FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+> AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+> LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+> OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+> SOFTWARE.
+
+"Growatt" is a trademark of Growatt New Energy Co., Ltd. This project is
+not affiliated with, endorsed by, or supported by Growatt. The name is used
+only to describe which hardware the integration talks to (nominative use).
+
 Fault/warning code text: Growatt's public Modbus protocol documents
 (referenced above) define the existence of these registers but not a
 code -> meaning table, so this repository does not claim or invent one
@@ -33,9 +64,8 @@ beyond the universally-documented "0 = none". See
 for details.
 
 This repository's register maps were last checked against upstream
-`0xAHA/Growatt_ModbusTCP` version **v1.5.5** and updated with the
-SPH-TL3-specific additions that version introduced (IPM/Boost temperature,
-BMS status/error/cycle count/SOH - see
+`0xAHA/Growatt_ModbusTCP` version **v1.6.2** and updated with everything
+that release carries for the SPH-TL3 and MIC profiles (see
 [`custom_components/growatt_local/README.md`](custom_components/growatt_local/README.md#keeping-in-sync-with-upstream)
 for what was and wasn't pulled in and why). Same MIT attribution as above
 applies to that data.
@@ -47,7 +77,8 @@ assistance of an AI coding assistant (**Claude**, by Anthropic, via
 Claude Code), directed and reviewed by the repository owner. Concretely:
 
 - Config flow, coordinator, Modbus client, and all entity platforms
-  (`sensor.py`, `number.py`, `switch.py`, `time.py`, `binary_sensor.py`)
+  (`sensor.py`, `number.py`, `select.py`, `time.py`, `binary_sensor.py`,
+  `diagnostics.py`)
   were AI-generated based on the register maps cited above and Home
   Assistant's public developer documentation.
 - The register map *data* (addresses/scale/units) was extracted from the
@@ -55,7 +86,7 @@ Claude Code), directed and reviewed by the repository owner. Concretely:
 - This integration has **not** been tested against a live Growatt
   inverter by the AI (no such access exists in that environment); testing
   was/should be done manually by the repository owner before relying on it,
-  especially before using any of the writable `number`/`switch`/`time`
+  especially before using any of the writable `number`/`select`/`time`
   controls.
 - Every source file carries a short note pointing back to this file.
 
