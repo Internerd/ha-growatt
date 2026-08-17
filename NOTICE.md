@@ -4,6 +4,12 @@ This file documents where content in this repository comes from, as
 required by the license of reused material, and discloses the use of AI
 assistance in writing it.
 
+It accompanies, and does not modify, [LICENSE](LICENSE) - the repository as
+a whole is MIT-licensed. `LICENSE` is kept as the bare MIT text so that
+automated license detection (GitHub's `licensee`, which HACS relies on)
+identifies it; the attribution that used to be appended there lives in
+section 1 below.
+
 ## 1. Third-party attribution (required by license)
 
 The Modbus register maps in

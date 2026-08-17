@@ -1,5 +1,11 @@
 # ha-growatt
 
+[![HACS: custom repository](https://img.shields.io/badge/HACS-custom-41BDF5.svg?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories)
+[![Release](https://img.shields.io/github/v/release/Internerd/ha-growatt?style=for-the-badge&color=41BDF5)](https://github.com/Internerd/ha-growatt/releases)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2023.6.0%2B-41BDF5.svg?style=for-the-badge&logo=home-assistant&logoColor=white)](https://www.home-assistant.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+[![Validate](https://img.shields.io/github/actions/workflow/status/Internerd/ha-growatt/validate.yml?branch=main&style=for-the-badge&label=HACS%20%2B%20hassfest)](https://github.com/Internerd/ha-growatt/actions/workflows/validate.yml)
+
 A self-contained Home Assistant custom integration for exactly two
 Growatt inverters (SPH-TL3 and MIC series) via Modbus TCP - a drop-in
 replacement for the HACS `Growatt_ModbusTCP` integration, scoped to just
